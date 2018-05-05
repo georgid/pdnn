@@ -25,7 +25,7 @@ import json
 
 import theano
 import theano.tensor as T
-from theano.tensor.signal import downsample
+#from theano.tensor.signal import pool
 from theano.tensor.nnet import conv
 
 from layers.logistic_sgd import LogisticRegression
