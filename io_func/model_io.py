@@ -20,9 +20,9 @@
 import numpy as np
 import os
 import sys
-import cPickle
+import pickle
 
-from StringIO import StringIO
+from io import StringIO
 import json
 
 import theano
@@ -73,8 +73,8 @@ def _nnet2file(layers, set_layer_num = -1, filename='nnet.out', start_layer = 0,
            nnet_dict[dict_a] = array_2_string((1.0 - dropout_factor) * layer.W.get_value())
        elif layer.type == 'conv':
            filter_shape = layer.filter_shape
-           for next_X in xrange(filter_shape[0]):
-               for this_X in xrange(filter_shape[1]):
+           for next_X in range(filter_shape[0]):
+               for this_X in range(filter_shape[1]):
                    new_dict_a = dict_a + ' ' + str(next_X) + ' ' + str(this_X)
                    nnet_dict[new_dict_a] = array_2_string((1.0-dropout_factor) * (layer.W.get_value())[next_X, this_X])
 
@@ -96,7 +96,7 @@ def _cfg2file(cfg, filename='cfg.out'):
                            # the activation function is initialized from the activation text ("sigmoid") when the network
                            # configuration is loaded
     with smart_open(filename, "wb") as output:
-        cPickle.dump(cfg, output, cPickle.HIGHEST_PROTOCOL)
+        pickle.dump(cfg, output, pickle.HIGHEST_PROTOCOL)
 
 def _file2nnet(layers, set_layer_num = -1, filename='nnet.in',  factor=1.0):
     n_layers = len(layers)
@@ -106,7 +106,7 @@ def _file2nnet(layers, set_layer_num = -1, filename='nnet.in',  factor=1.0):
 
     with smart_open(filename, 'rb') as fp:
         nnet_dict = json.load(fp)
-    for i in xrange(set_layer_num):
+    for i in range(set_layer_num):
         dict_a = 'W' + str(i)
         layer = layers[i]
         if layer.type == 'fc':
@@ -115,8 +115,8 @@ def _file2nnet(layers, set_layer_num = -1, filename='nnet.in',  factor=1.0):
         elif layer.type == 'conv':
             filter_shape = layer.filter_shape
             W_array = layer.W.get_value()
-            for next_X in xrange(filter_shape[0]):
-                for this_X in xrange(filter_shape[1]):
+            for next_X in range(filter_shape[0]):
+                for this_X in range(filter_shape[1]):
                     new_dict_a = dict_a + ' ' + str(next_X) + ' ' + str(this_X)
                     mat_shape = W_array[next_X, this_X, :, :].shape
                     W_array[next_X, this_X, :, :] = factor * np.asarray(string_2_array(nnet_dict[new_dict_a]), dtype=theano.config.floatX).reshape(mat_shape)
@@ -127,7 +127,7 @@ def _file2nnet(layers, set_layer_num = -1, filename='nnet.in',  factor=1.0):
 def _cnn2file(conv_layers, filename='nnet.out', input_factor = 1.0, factor=[]):
     n_layers = len(conv_layers)
     nnet_dict = {}
-    for i in xrange(n_layers):
+    for i in range(n_layers):
        conv_layer = conv_layers[i]
        filter_shape = conv_layer.filter_shape
 
@@ -137,8 +137,8 @@ def _cnn2file(conv_layers, filename='nnet.out', input_factor = 1.0, factor=[]):
        if i > 0 and len(factor) > 0:
            dropout_factor = factor[i-1]
 
-       for next_X in xrange(filter_shape[0]):
-           for this_X in xrange(filter_shape[1]):
+       for next_X in range(filter_shape[0]):
+           for this_X in range(filter_shape[1]):
                dict_a = 'W' + str(i) + ' ' + str(next_X) + ' ' + str(this_X)
                nnet_dict[dict_a] = array_2_string(dropout_factor * (conv_layer.W.get_value())[next_X, this_X])
 
@@ -155,13 +155,13 @@ def _file2cnn(conv_layers, filename='nnet.in', factor=1.0):
 
     with smart_open(filename, 'rb') as fp:
         nnet_dict = json.load(fp)
-    for i in xrange(n_layers):
+    for i in range(n_layers):
         conv_layer = conv_layers[i]
         filter_shape = conv_layer.filter_shape
         W_array = conv_layer.W.get_value()
 
-        for next_X in xrange(filter_shape[0]):
-            for this_X in xrange(filter_shape[1]):
+        for next_X in range(filter_shape[0]):
+            for this_X in range(filter_shape[1]):
                 dict_a = 'W' + str(i) + ' ' + str(next_X) + ' ' + str(this_X)
                 W_array[next_X, this_X, :, :] = factor * np.asarray(string_2_array(nnet_dict[dict_a]))
 
